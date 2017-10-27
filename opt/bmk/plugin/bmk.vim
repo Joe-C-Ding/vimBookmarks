@@ -1,8 +1,8 @@
 " bmk.vim	vim: ts=8 sw=4 ff=unix fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
-" Version:	0.95
-" Last Change:	2017-10-26 17:42:09
+" Version:	0.9.7
+" Last Change:	2017-10-27 10:08:29
 
 if &cp || exists("g:loaded_bmk")
     finish
@@ -13,12 +13,12 @@ let s:keepcpo = &cpo
 set cpo&vim
 
 " mappings	{{{1
-nnoremap <silent>   m`	:call AddBmkHere('')<CR>
+nnoremap <silent>   m`	m`:call AddBmkHere('')<CR>
 nnoremap <silent>   '`	:call OpenBmk('')<CR>
 
 let letters = split("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z")
 for l in letters
-    exec 'nnoremap <silent>  m'.l.' :call AddBmkHere("'.l.'")<CR>'
+    exec 'nnoremap <silent>  m'.l.' m'.l.':call AddBmkHere("'.l.'")<CR>'
     exec "nnoremap <silent> \'".l.' :call OpenBmk("'.l.'")<CR>'
 endfor
 
@@ -29,17 +29,25 @@ let s:bmkdict = {}
 let s:bufnumber = -1
 
 function! LoadDict()	" {{{2
-    if s:bufnumber < 0
-	exec "split +hide " . s:bookmarks
+    if s:bufnumber < 0	" first time we need to load it from file
+	silent exec 'split ' . s:bookmarks
+	setl bufhidden=hide nobuflisted noswapfile
+	hide
+
+	" and this file will stay in memory for after use
 	let s:bufnumber = bufnr(s:bookmarks)
     endif
+
     let lines = getbufline(s:bufnumber, 1, "$")
+    if empty(lines)
+	let lines = ['{}']
+    endif
     let s:bmkdict = js_decode(join(lines, "\n"))
 endfunction
 
 function! SaveDict()	" {{{2
     let json = js_encode(s:bmkdict)
-    exec "split " . s:bookmarks
+    silent exec "split " . s:bookmarks
 
     %d_	" this deletes all contents in that file
     call setline(1, json)
@@ -77,13 +85,15 @@ function! RemvoeBmk(name)  " {{{2
 endfunction
 
 function! OpenBmk(name)    " {{{2
+    silent call LoadDict()
+
     let name = a:name
     if a:name == ""
-	let name = input("Open bookmark [keep empty to cancel]? ")
+	let name = input("Open bookmark [keep empty to cancel]? ",
+		    \"", "custom,BmkOpenComplete")
 	if name == "" | return | endif
     endif
 
-    silent call LoadDict()
     if !has_key(s:bmkdict, name)
 	echo 'noexist bookmark: "'.name.'"'
 	return
@@ -107,7 +117,8 @@ endfunction
 function! AddBmkHere(name) " {{{2
     let name = a:name
     if a:name == ""
-	let name = input("New bookmark name [keep empty to cancel]? ")
+	let name = input("New bookmark name [keep empty to cancel]? ",
+		    \"", "custom,BmkAddComplete")
 	if name == "" | return | endif
     endif
 
@@ -115,12 +126,12 @@ function! AddBmkHere(name) " {{{2
     call AddBmk(name, expand("%:p"), pos[1], pos[2])
 endfunction
 
-function! BmkCompare(i1, i2)
+function! BmkCompare(i1, i2)	" {{{2
     return a:i1[0] < a:i2[0] ? -1 : 1
 endfunction
 
 command -nargs=0 ListBookmarks	:call ListBmk()
-function! ListBmk()
+function! ListBmk() " {{{2
     silent call LoadDict()
 
     let templist = items(s:bmkdict)
@@ -129,6 +140,16 @@ function! ListBmk()
     for i in templist
 	echo i[0]." -> ".i[1].file
     endfor
+endfunction
+
+function! BmkOpenComplete(ArgLead, CmdLine, CursorPos)	" {{{2
+    let comp = keys(s:bmkdict)
+    return join(comp, "\n")
+endfunction
+
+function! BmkAddComplete(ArgLead, CmdLine, CursorPos)	" {{{2
+    " complete for AddBmkHere
+    return expand("%:t:r")
 endfunction
 
 " }}}1
