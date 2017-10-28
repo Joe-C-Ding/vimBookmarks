@@ -2,7 +2,7 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	0.9.9
-" Last Change:	2017-10-28 21:36:45
+" Last Change:	2017-10-28 22:10:24
 
 if &cp || exists("g:loaded_bmk")
     finish
@@ -16,11 +16,12 @@ set cpo&vim
 nnoremap <silent>   m`	m`:call AddBmkHere('')<CR>
 nnoremap <silent>   '`	:call OpenBmk('')<CR>
 
-let letters = split("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z")
-for l in letters
+let s:letters = split("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z")
+for l in s:letters
     exec 'nnoremap <silent>  m'.l.' m'.l.':call AddBmkHere("'.l.'")<CR>'
     exec "nnoremap <silent> \'".l.' :call OpenBmk("'.l.'")<CR>'
 endfor
+unlet s:letters
 
 " commands	{{{1
 command -nargs=0 ListBookmarks	:call ListBmk()
