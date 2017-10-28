@@ -12,7 +12,7 @@ This plugin
 ## key mappings and commands
 map/cmd | action
 ----|----
-mX | to add bookmarks named X at current cursor position of this file.  `X` can be any uppercase letter, means `A-Z`.
+mX | to add bookmarks named X at current cursor position of this file, and set vim mark X at the same point.  `X` can be any uppercase letter, means `A-Z`.
 'X | to jump to the bookmark X.
 m` | to create a named bookmarks interactivly.  `<Tab>` may be used to perform completion of current filename when asking you to enter the bookmark's name.
 '` | to jump to a named bookmarks. `<Tab>` to perform completion.
