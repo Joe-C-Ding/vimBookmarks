@@ -7,6 +7,7 @@ This plugin is desinged as a package of vim.
 Just clone it into
 - `~/.vim/pack` for unix-like system or
 - `~/vimfiles/pack` for Windows system
+
 and enable this plugin see below.
 
 ## enable/disable plugin
