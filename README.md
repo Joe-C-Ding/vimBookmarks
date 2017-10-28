@@ -9,12 +9,14 @@ This plugin
 - compatible with vim internal mark A-Z. (of corse for current instance of vim if more than one is runing) 
 - named bookmarks is available. 26 marks are not enough rignt? :)
 
+If you are not familiar with vim marks, see `:h mark-motions` for details.
+
 ## key mappings and commands
 map/cmd | action
 ----|----
-mX | to add bookmarks named X at current cursor position of this file, and set vim mark X at the same position too.  `X` can be any uppercase letter, means `A-Z`.
+mX | to add bookmarks named X at current cursor position of this file.  `X` can be any uppercase letter, means `A-Z`. (this also set vim mark X at the same position too)
 'X | to jump to the bookmark X.
-m` | to create a named bookmarks interactivly.  `<Tab>` may be used to perform completion of current filename when asking you to enter the bookmark's name.
+m` | to create a named bookmarks interactivly.  `<Tab>` may be used to perform completion of current filename when asking you to enter the bookmark's name. (this also set vim mark ` too)
 '` | to jump to a named bookmarks. `<Tab>` to perform completion.
 :ListBookmarks | list all bookmarks
 
