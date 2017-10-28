@@ -1,8 +1,8 @@
 " bmk.vim	vim: ts=8 sw=4 ff=unix fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
-" Version:	0.9.7
-" Last Change:	2017-10-27 10:08:29
+" Version:	0.9.9
+" Last Change:	2017-10-28 21:36:45
 
 if &cp || exists("g:loaded_bmk")
     finish
@@ -22,6 +22,8 @@ for l in letters
     exec "nnoremap <silent> \'".l.' :call OpenBmk("'.l.'")<CR>'
 endfor
 
+" commands	{{{1
+command -nargs=0 ListBookmarks	:call ListBmk()
 
 " functions	{{{1
 let s:bookmarks = expand("<sfile>:p:h") . '/../vimbookmarks.bmk'
@@ -80,6 +82,7 @@ function! RemvoeBmk(name)  " {{{2
 	return
     endif
     call remove(s:bmkdict, a:name)
+    echo 'bookmark removed: "'.a:name.'"'
 
     silent call SaveDict()
 endfunction
@@ -126,12 +129,12 @@ function! AddBmkHere(name) " {{{2
     call AddBmk(name, expand("%:p"), pos[1], pos[2])
 endfunction
 
-function! BmkCompare(i1, i2)	" {{{2
+" functions for commands    " {{{2
+function! BmkCompare(i1, i2)	" {{{3
     return a:i1[0] < a:i2[0] ? -1 : 1
 endfunction
 
-command -nargs=0 ListBookmarks	:call ListBmk()
-function! ListBmk() " {{{2
+function! ListBmk() " {{{3
     silent call LoadDict()
 
     let templist = items(s:bmkdict)
@@ -142,17 +145,18 @@ function! ListBmk() " {{{2
     endfor
 endfunction
 
-function! BmkOpenComplete(ArgLead, CmdLine, CursorPos)	" {{{2
+" functions for completions	" {{{2
+function! BmkOpenComplete(ArgLead, CmdLine, CursorPos)	" {{{3
     let comp = keys(s:bmkdict)
     return join(comp, "\n")
 endfunction
 
-function! BmkAddComplete(ArgLead, CmdLine, CursorPos)	" {{{2
+function! BmkAddComplete(ArgLead, CmdLine, CursorPos)	" {{{3
     " complete for AddBmkHere
     return expand("%:t:r")
 endfunction
-
 " }}}1
+
 " clean up
 let &cpo = s:keepcpo
 unlet s:keepcpo
