@@ -2,7 +2,7 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	0.9.9
-" Last Change:	2017-10-28 22:10:24
+" Last Change:	2017-10-28 23:13:46
 
 if &cp || exists("g:loaded_bmk")
     finish
@@ -64,7 +64,7 @@ function! AddBmk(name, file, line, column) " {{{2
     if has_key(s:bmkdict, a:name)
 	echo 'exist bookmark: "'.a:name.'" -> '.s:bmkdict[a:name].file
 	let yn = input("update [y]/n? ")
-	if yn != '' || yn !~ 'y\%[es]'
+	if yn != '' && yn !~ 'y\%[es]'
 	    " if no changes are needed, code below will be skipped
 	    return
 	endif
@@ -107,7 +107,7 @@ function! OpenBmk(name)    " {{{2
     if glob(bmk.file) == ""
 	echo 'file no longer exisits: "'.name.'" -> '.s:bmkdict[name].file
 	let yn = input("remove this bookmark [y]/n? ")
-	if yn != '' || yn !~ 'y\%[es]'
+	if yn != '' && yn !~ 'y\%[es]'
 	    return
 	endif
 	silent call RemvoeBmk(name)
