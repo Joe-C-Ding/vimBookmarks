@@ -1,5 +1,6 @@
 # vimBookmarks
 simple bookmarks plugin for vim
+中文说明在[这里](https://github.com/Joe-C-Ding/joe-c-ding.github.io/issues/1)
 
 ## featrue
 Vim comes with marks system itself, which is very useful.  All the marks will write to viminfo file when vim quiting, but if you has more than one vim instance is running, viminfo will be overwriten by the one who quit later, and many information will lose including those of marks.
