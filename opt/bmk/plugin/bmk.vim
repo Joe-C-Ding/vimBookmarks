@@ -2,9 +2,9 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	0.9.9
-" Last Change:	2017-10-28 23:13:46
+" Last Change:	2017-11-03 08:34:49
 
-if &cp || exists("g:loaded_bmk")
+if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
 endif
 let g:loaded_bmk = 1
@@ -39,6 +39,10 @@ function! LoadDict()	" {{{2
 
 	" and this file will stay in memory for after use
 	let s:bufnumber = bufnr(s:bookmarks)
+    else
+	silent exec 'split ' . s:bookmarks
+	e!	" reload the file.
+	hide
     endif
 
     let lines = getbufline(s:bufnumber, 1, "$")
