@@ -2,7 +2,7 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	0.9.9
-" Last Change:	2017-11-03 08:34:49
+" Last Change:	2019-02-06 16:30:11
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -46,7 +46,7 @@ function! LoadDict()	" {{{2
     endif
 
     let lines = getbufline(s:bufnumber, 1, "$")
-    if empty(lines)
+    if empty(lines) || lines == ['']
 	let lines = ['{}']
     endif
     let s:bmkdict = js_decode(join(lines, "\n"))
