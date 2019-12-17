@@ -1,8 +1,8 @@
 " bmk.vim	vim: ts=8 sw=4 ff=unix fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
-" Version:	0.9.9
-" Last Change:	2019-02-06 16:30:11
+" Version:	0.9.95
+" Last Change:	2019-12-14 23:14:47
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -11,6 +11,13 @@ let g:loaded_bmk = 1
 
 let s:keepcpo = &cpo
 set cpo&vim
+
+" options	{{{1
+" if g:vbookmarks_omitpath is true, then only the file's name of single letter
+" markers will be listed.
+if !exists("g:vbookmarks_omitpath")
+    let g:vbookmarks_omitpath = 0
+endif
 
 " mappings	{{{1
 nnoremap <silent>   m`	m`:call AddBmkHere('')<CR>
@@ -145,8 +152,15 @@ function! ListBmk() " {{{3
     let templist = items(s:bmkdict)
     call sort(templist, "BmkCompare")
 
+    " omit file's path for single-letter-marks
     for i in templist
-	echo i[0]." -> ".i[1].file
+	if g:vbookmarks_omitpath && strlen(i[0]) == 1
+	    let fname = fnamemodify(i[1].file, ":t:r")
+	else
+	    let fname = i[1].file
+	endif
+
+	echo i[0]." -> ".fname
     endfor
 endfunction
 
