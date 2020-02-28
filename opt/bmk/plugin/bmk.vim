@@ -2,7 +2,7 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	0.9.95
-" Last Change:	2019-12-14 23:14:47
+" Last Change:	2020-02-28 19:17:10
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -148,6 +148,14 @@ endfunction
 
 function! ListBmk() " {{{3
     silent call LoadDict()
+
+    if len(s:bmkdict) == 0
+	echohl WarningMsg
+	echo "ListBookmarks: No bookmark is recorded yet."
+	echohl None
+
+	return
+    endif
 
     let templist = items(s:bmkdict)
     call sort(templist, "BmkCompare")
