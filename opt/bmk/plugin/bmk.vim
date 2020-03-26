@@ -1,8 +1,8 @@
-" bmk.vim	vim: ts=8 sw=4 ff=unix fdm=marker
+" bmk.vim	vim: ts=8 sw=4 fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	0.9.95
-" Last Change:	2020-02-28 19:17:10
+" Last Change:	2020-03-26 12:33:10
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
