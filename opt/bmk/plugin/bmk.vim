@@ -1,8 +1,8 @@
 " bmk.vim	vim: ts=8 sw=4 fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
-" Version:	0.9.95
-" Last Change:	2020-03-26 12:33:10
+" Version:	0.9.99
+" Last Change:	2020-03-29 13:51:05
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -13,8 +13,8 @@ let s:keepcpo = &cpo
 set cpo&vim
 
 " options	{{{1
-" if g:vbookmarks_omitpath is true, then only the file's name of single letter
-" markers will be listed.
+" if g:vbookmarks_omitpath is true, then for single-letter bookmarks only the
+" corresponding files name are shown, the paths are ignored.
 if !exists("g:vbookmarks_omitpath")
     let g:vbookmarks_omitpath = 0
 endif
@@ -36,23 +36,9 @@ command -nargs=0 ListBookmarks	:call ListBmk()
 " functions	{{{1
 let s:bookmarks = expand("<sfile>:p:h") . '/../vimbookmarks.bmk'
 let s:bmkdict = {}
-let s:bufnumber = -1
 
 function! LoadDict()	" {{{2
-    if s:bufnumber < 0	" first time we need to load it from file
-	silent exec 'split ' . s:bookmarks
-	setl bufhidden=hide nobuflisted noswapfile
-	hide
-
-	" and this file will stay in memory for after use
-	let s:bufnumber = bufnr(s:bookmarks)
-    else
-	silent exec 'split ' . s:bookmarks
-	e!	" reload the file.
-	hide
-    endif
-
-    let lines = getbufline(s:bufnumber, 1, "$")
+    let lines = readfile(s:bookmarks)
     if empty(lines) || lines == ['']
 	let lines = ['{}']
     endif
@@ -60,13 +46,7 @@ function! LoadDict()	" {{{2
 endfunction
 
 function! SaveDict()	" {{{2
-    let json = js_encode(s:bmkdict)
-    silent exec "split " . s:bookmarks
-
-    %d_	" this deletes all contents in that file
-    call setline(1, json)
-    w	" and updates them with new ones
-    hide
+    call writefile(js_encode(s:bmkdict), s:bookmarks)
 endfunction
 
 function! AddBmk(name, file, line, column) " {{{2
@@ -87,16 +67,14 @@ function! AddBmk(name, file, line, column) " {{{2
     silent call SaveDict()   " otherwise save every changes to the file
 endfunction
 
-function! RemvoeBmk(name)  " {{{2
+function! RemoveBmk(name)  " {{{2
     silent call LoadDict()
 
-    if !has_key(s:bmkdict, a:name)
-	return
+    if has_key(s:bmkdict, a:name)
+	call remove(s:bmkdict, a:name)
+	echo 'bookmark removed: "'.a:name.'"'
+	silent call SaveDict()
     endif
-    call remove(s:bmkdict, a:name)
-    echo 'bookmark removed: "'.a:name.'"'
-
-    silent call SaveDict()
 endfunction
 
 function! OpenBmk(name)    " {{{2
@@ -110,22 +88,22 @@ function! OpenBmk(name)    " {{{2
     endif
 
     if !has_key(s:bmkdict, name)
-	echo 'noexist bookmark: "'.name.'"'
+	echo 'non-exist bookmark: "'.name.'"'
 	return
     endif
 
     let bmk = s:bmkdict[name]
-    if glob(bmk.file) == ""
+    if file_readable(bmk.file) || isdirectory(bmk.file)
+	exec "e " . bmk.file
+	call cursor(bmk.line, bmk.column)
+
+    else
 	echo 'file no longer exisits: "'.name.'" -> '.s:bmkdict[name].file
 	let yn = input("remove this bookmark [y]/n? ")
 	if yn != '' && yn !~ 'y\%[es]'
 	    return
 	endif
-	silent call RemvoeBmk(name)
-
-    else
-	exec "e " . bmk.file
-	call cursor(bmk.line, bmk.column)
+	silent call RemoveBmk(name)
     endif
 endfunction
 
@@ -142,23 +120,17 @@ function! AddBmkHere(name) " {{{2
 endfunction
 
 " functions for commands    " {{{2
-function! BmkCompare(i1, i2)	" {{{3
-    return a:i1[0] < a:i2[0] ? -1 : 1
-endfunction
-
 function! ListBmk() " {{{3
     silent call LoadDict()
 
-    if len(s:bmkdict) == 0
+    if empty(s:bmkdict)
 	echohl WarningMsg
 	echo "ListBookmarks: No bookmark is recorded yet."
 	echohl None
-
 	return
     endif
 
-    let templist = items(s:bmkdict)
-    call sort(templist, "BmkCompare")
+    let templist = items(s:bmkdict)->sort({a,b -> a[0]<b[0] ? -1 : 1})
 
     " omit file's path for single-letter-marks
     for i in templist
@@ -168,18 +140,17 @@ function! ListBmk() " {{{3
 	    let fname = i[1].file
 	endif
 
-	echo i[0]." -> ".fname
+	echo i[0] '->' fname
     endfor
 endfunction
 
 " functions for completions	" {{{2
 function! BmkOpenComplete(ArgLead, CmdLine, CursorPos)	" {{{3
-    let comp = keys(s:bmkdict)
-    return join(comp, "\n")
+    return keys(s:bmkdict)->join("\n")
 endfunction
 
+" complete for AddBmkHere
 function! BmkAddComplete(ArgLead, CmdLine, CursorPos)	" {{{3
-    " complete for AddBmkHere
     return expand("%:t:r")
 endfunction
 " }}}1
