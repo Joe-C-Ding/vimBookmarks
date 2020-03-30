@@ -1,8 +1,8 @@
 " bmk.vim	vim: ts=8 sw=4 fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
-" Version:	0.9.99
-" Last Change:	2020-03-29 13:51:05
+" Version:	1.0
+" Last Change:	2020-03-30 09:28:08
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -46,13 +46,14 @@ function! LoadDict()	" {{{2
 endfunction
 
 function! SaveDict()	" {{{2
-    call writefile(js_encode(s:bmkdict), s:bookmarks)
+    call writefile([js_encode(s:bmkdict)], s:bookmarks)
 endfunction
 
 function! AddBmk(name, file, line, column) " {{{2
     silent call LoadDict()	" always update current data
 
     if has_key(s:bmkdict, a:name)
+	redraw
 	echo 'exist bookmark: "'.a:name.'" -> '.s:bmkdict[a:name].file
 	let yn = input("update [y]/n? ")
 	if yn != '' && yn !~ 'y\%[es]'
@@ -62,7 +63,7 @@ function! AddBmk(name, file, line, column) " {{{2
     endif
 
     let s:bmkdict[a:name] = {'file': a:file, 'line':a:line, 'column':a:column}
-    echo 'bookmark added: "'.a:name.'"'
+    redraw | echo 'bookmark added: "'.a:name.'"'
 
     silent call SaveDict()   " otherwise save every changes to the file
 endfunction
@@ -72,7 +73,7 @@ function! RemoveBmk(name)  " {{{2
 
     if has_key(s:bmkdict, a:name)
 	call remove(s:bmkdict, a:name)
-	echo 'bookmark removed: "'.a:name.'"'
+	redraw | echo 'bookmark removed: "'.a:name.'"'
 	silent call SaveDict()
     endif
 endfunction
@@ -88,7 +89,7 @@ function! OpenBmk(name)    " {{{2
     endif
 
     if !has_key(s:bmkdict, name)
-	echo 'non-exist bookmark: "'.name.'"'
+	redraw | echo 'non-exist bookmark: "'.name.'"'
 	return
     endif
 
@@ -98,6 +99,7 @@ function! OpenBmk(name)    " {{{2
 	call cursor(bmk.line, bmk.column)
 
     else
+	redraw
 	echo 'file no longer exisits: "'.name.'" -> '.s:bmkdict[name].file
 	let yn = input("remove this bookmark [y]/n? ")
 	if yn != '' && yn !~ 'y\%[es]'
