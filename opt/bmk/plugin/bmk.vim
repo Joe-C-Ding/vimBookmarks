@@ -2,7 +2,7 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	1.0
-" Last Change:	2020-03-30 09:28:08
+" Last Change:	2020-04-10 17:27:00
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -38,10 +38,11 @@ let s:bookmarks = expand("<sfile>:p:h") . '/../vimbookmarks.bmk'
 let s:bmkdict = {}
 
 function! LoadDict()	" {{{2
-    let lines = readfile(s:bookmarks)
-    if empty(lines) || lines == ['']
+    if filereadable(s:bookmarks)
+	let lines = readfile(s:bookmarks)
+    else
 	let lines = ['{}']
-    endif
+    end
     let s:bmkdict = js_decode(join(lines, "\n"))
 endfunction
 
