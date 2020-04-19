@@ -2,7 +2,7 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	1.0
-" Last Change:	2020-04-10 21:49:12
+" Last Change:	2020-04-20 00:56:05
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -63,45 +63,52 @@ function! OpenBmk(name)    " {{{2
     call s:LoadDict()
 
     if a:name == ""
-	let name = input("Open bookmark (empty cancels)? ", "",
+	let l:name = input("Open bookmark (empty cancels)? ", "",
 			\"custom,BmkOpenComplete")
-	if empty(name) | return | endif
+	if empty(l:name) | return | endif
     else
-	let name = a:name
+	let l:name = a:name
     endif
 
-    if !has_key(s:bmkdict, name)
-	redraw | echo 'non-exist bookmark: "'.name.'"'
+    if !has_key(s:bmkdict, l:name)
+	redraw | echo 'non-exist bookmark: "'.l:name.'"'
 	return
     endif
 
-    let bmk = s:bmkdict[name]
+    let l:bmk = s:bmkdict[l:name]
     if file_readable(bmk.file) || isdirectory(bmk.file)
 	exec "e " . bmk.file
 	call cursor(bmk.line, bmk.column)
 
     else
 	redraw
-	echo 'file no longer exisits: "'.name.'" -> '.s:bmkdict[name].file
-	let yn = input("remove this bookmark [y]/n? ")
-	if !empty(yn) && yn !~ 'y\%[es]'
-	    return
+	echo 'file no longer exisits: "'.l:name.'" -> '.l:bmk.file
+	let yn = input("remove this bookmark [y]/n/e? ")
+	if yn =~? 'e\%[dit]'
+	    let l:file = input('update bookmark (empty cancels): ', l:bmk.file, 'file')
+	    if !empty(l:file)
+		let l:bmk.file = l:file
+		call s:SaveDict()
+		call OpenBmk(l:name)
+		redraw | echo 'bookmark updated: "'.l:name.'"'
+	    endif
+	elseif empty(yn) || yn =~? 'y\%[es]'
+	    call s:RemoveBmk(l:name)
 	endif
-	call s:RemoveBmk(name)
     endif
 endfunction
 
 function! AddBmkHere(name) " {{{2
     if a:name == ""
-	let name = input("New bookmark name (empty cancels)? ","",
+	let l:name = input("New bookmark name (empty cancels)? ","",
 			\"custom,BmkAddComplete")
-	if empty(name) | return | endif
+	if empty(l:name) | return | endif
     else
-	let name = a:name
+	let l:name = a:name
     endif
 
     let pos = getpos(".")
-    call s:AddBmk(name, expand("%:p"), pos[1], pos[2])
+    call s:AddBmk(l:name, expand("%:p"), pos[1], pos[2])
 endfunction
 
 function! s:LoadDict()	" {{{3
