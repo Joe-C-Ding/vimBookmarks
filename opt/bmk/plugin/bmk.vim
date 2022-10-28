@@ -2,7 +2,7 @@
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
 " Version:	1.0
-" Last Change:	2020-04-20 00:56:05
+" Last Change:	2022-10-28 19:34:08
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -142,19 +142,32 @@ function! s:AddBmk(name, file, line, column) " {{{3
     redraw | echo 'bookmark added: "'.a:name.'"'
 endfunction
 
-function! s:RemoveBmk(name)  " {{{3
-    call s:LoadDict()
+" commands	{{{1
+command -nargs=? -complete=custom,BmkOpenComplete
+	    \ RemoveBookmark	:call <SID>RemoveBmk(<f-args>)
 
-    if has_key(s:bmkdict, a:name)
-	call remove(s:bmkdict, a:name)
+function! s:RemoveBmk(name) abort	" {{{2
+    if a:name == ""
+	let l:name = input("Remove bookmark (empty cancels)? ","",
+			\"custom,BmkAddComplete")
+	if empty(l:name) | return | endif
+    else
+	let l:name = a:name
+    endif
+
+    call s:LoadDict()
+    if has_key(s:bmkdict, l:name)
+	call remove(s:bmkdict, l:name)
 	silent call s:SaveDict()
-	redraw | echo 'bookmark removed: "'.a:name.'"'
+	redraw | echo 'bookmark removed: "'.l:name.'"'
+    else
+	echo 'non-exist bookmark: "'.l:name.'"'
     endif
 endfunction
 
-
 " functions for completions	" {{{3
 function! BmkOpenComplete(ArgLead, CmdLine, CursorPos)
+    call s:LoadDict()
     return keys(s:bmkdict)->join("\n")
 endfunction
 
