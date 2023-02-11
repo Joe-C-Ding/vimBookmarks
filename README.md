@@ -4,10 +4,10 @@ simple bookmarks plugin for vim
 中文说明在[这里](https://github.com/Joe-C-Ding/joe-c-ding.github.io/issues/1)
 
 ## featrue
-Vim comes with marks system itself, which is very useful.  All the marks will write to viminfo file when vim quiting, but if you has more than one vim instance is running, viminfo will be overwriten by the one who quit later, and many information will lose including those of marks.
+Vim comes with marks system itself, which is very useful.  All the marks will be written to viminfo file when vim quiting, but if you have more than one vim instance running, viminfo will be overwriten by the one who quits later, and many information will lose including those of marks.
 
 This plugin
-- use a file to sync all bookmarks among all vim instances. It reads that file before perform actions, and writes it immediately if any change is made.
+- use a file to sync all bookmarks among all vim instances. It reads that file before performing actions, and writes it immediately if any change is made.
 - compatible with vim internal mark A-Z. (of corse for current instance of vim if more than one is runing) 
 - named bookmarks is available. 26 marks are not enough rignt? :)
 
