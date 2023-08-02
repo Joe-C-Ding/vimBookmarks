@@ -1,8 +1,8 @@
 " bmk.vim	vim: ts=8 sw=4 fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
-" Version:	1.0
-" Last Change:	2022-10-28 19:34:08
+" Version:	1.1
+" Last Change:	2023-08-02 21:18:54
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -13,8 +13,12 @@ let s:keepcpo = &cpo
 set cpo&vim
 
 " options	{{{1
-" if g:vbookmarks_omitpath is true, then for single-letter bookmarks only the
-" corresponding files name are shown, the paths are ignored.
+" g:vbookmarks_omitpath controls how single-letter bookmarks show, the larger
+" this option number the shorter the path shows.
+"   if 0, full path is shown, which is the way to show the normal bookmarks.
+"   if 1, only the last directory and the file's name is shown.
+"   if 2, only file's name is shown.
+" default value is 0.
 if !exists("g:vbookmarks_omitpath")
     let g:vbookmarks_omitpath = 0
 endif
@@ -45,12 +49,15 @@ function! ListBmk() abort	" {{{2
     " omit file's path for single-letter-marks
     for i in templist
 	if g:vbookmarks_omitpath && strlen(i[0]) == 1
-	    let fname = fnamemodify(i[1].file, ":t:r")
+	    let l:fname = fnamemodify(i[1].file, ":t:r")
+	    if g:vbookmarks_omitpath == 1
+		let l:fname = fnamemodify(i[1].file, ":h:t") .. '/' .. l:fname
+	    endif
 	else
-	    let fname = i[1].file
+	    let l:fname = i[1].file
 	endif
 
-	echo i[0] '->' fname
+	echo i[0] '->' l:fname
     endfor
 endfunction
 " }}}2
