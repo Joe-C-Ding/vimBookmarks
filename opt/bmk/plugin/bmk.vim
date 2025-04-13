@@ -1,8 +1,8 @@
 " bmk.vim	vim: ts=8 sw=4 fdm=marker
 " Language:	Simple bookmarks system for vim
 " Maintainer:	Joe Ding
-" Version:	1.1
-" Last Change:	2023-08-02 21:18:54
+" Version:	1.2
+" Last Change:	2025-04-17 18:31:18
 
 if &cp || v:version < 800 || exists("g:loaded_bmk")
     finish
@@ -27,12 +27,10 @@ endif
 nnoremap <silent>   m`	m`:call AddBmkHere('')<CR>
 nnoremap <silent>   '`	:call OpenBmk('')<CR>
 
-let s:letters = split("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z")
-for l in s:letters
+for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     exec 'nnoremap <silent>  m'.l.' m'.l.':call AddBmkHere("'.l.'")<CR>'
     exec 'nnoremap <silent> '''.l.' :call OpenBmk("'.l.'")<CR>'
 endfor
-unlet s:letters
 
 " commands	{{{1
 command ListBookmarks	:call ListBmk()
@@ -64,6 +62,7 @@ endfunction
 
 " functions	{{{1
 let s:bookmarks = expand("<sfile>:p:h") . '/../vimbookmarks.bmk'
+let s:modify = 0
 let s:bmkdict = {}
 
 function! OpenBmk(name)    " {{{2
@@ -84,7 +83,7 @@ function! OpenBmk(name)    " {{{2
 
     let l:bmk = s:bmkdict[l:name]
     if file_readable(bmk.file) || isdirectory(bmk.file)
-	exec "e " . bmk.file
+	exec "e" bmk.file
 	call cursor(bmk.line, bmk.column)
 
     else
@@ -119,16 +118,15 @@ function! AddBmkHere(name) " {{{2
 endfunction
 
 function! s:LoadDict()	" {{{3
-    if filereadable(s:bookmarks)
-	let lines = readfile(s:bookmarks)
-    else
-	let lines = ['{}']
+    if filereadable(s:bookmarks) && getftime(s:bookmarks) > s:modify
+	let s:bmkdict = js_decode(join(readfile(s:bookmarks), "\n"))
+	let s:modify = getftime(s:bookmarks)
     end
-    let s:bmkdict = js_decode(join(lines, "\n"))
 endfunction
 
 function! s:SaveDict()	" {{{3
     call writefile([js_encode(s:bmkdict)], s:bookmarks)
+    let s:modify = getftime(s:bookmarks)
 endfunction
 
 function! s:AddBmk(name, file, line, column) " {{{3
@@ -156,7 +154,7 @@ command -nargs=? -complete=custom,BmkOpenComplete
 function! s:RemoveBmk(name) abort	" {{{2
     if a:name == ""
 	let l:name = input("Remove bookmark (empty cancels)? ","",
-			\"custom,BmkAddComplete")
+			\"custom,BmkOpenComplete")
 	if empty(l:name) | return | endif
     else
 	let l:name = a:name
