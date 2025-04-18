@@ -39,8 +39,12 @@ packadd! bmk
 into your vimrc file to enable this plugin. You should know how to disable it now :)
 
 ## Dependency
-*required* vim version is >= 8.0.
+*required* Vim version is >= 9.1.
 
+This plugin is rewrighten in new vim 9 script. And `class` is used, which is introdued from 9.1.
 Packages is introduced into vim from 8.0. And this plugin also depends on functions `js_encode` and `js_decode`, which is introduced from 8.0.
+
+if your Vim version is >= 8.0, there is a commit taged vim8 can be used. It is the last version before upgrated to vim 9.
+Now this 2 version has the exactly the same features. However Vim 9 has come, the new the better! :)
 
 More about using vim packages see vim's document `:h packages`.
