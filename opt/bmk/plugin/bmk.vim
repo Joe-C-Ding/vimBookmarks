@@ -2,7 +2,7 @@ vim9script noclear
 
 # Language:	Simple bookmarks system for vim
 # Maintainer:	Joe Ding
-# Last Change:	2025-04-18 23:59:16
+# Last Change:	2025-05-02 19:58:00
 
 if exists("g:loaded_bmk") || &cp || v:version < 901
     finish
@@ -49,7 +49,7 @@ class BmkDict	# {{{2
     #		{file: string, line: number, column: number}
     static const _bmk: string = $'{expand("<script>:p:h:h")}/vimbookmarks.bmk'
     static var _modify: number = 0
-    static var _dict: dict<dict<any>>
+    static var _dict: dict<dict<any>> = {}
 
     static def LoadDict()	# {{{3
 	if filereadable(_bmk) && getftime(_bmk) > _modify
