@@ -2,7 +2,7 @@ vim9script noclear
 
 # Language:	Simple bookmarks system for vim
 # Maintainer:	Joe Ding
-# Last Change:	2025-05-02 19:58:00
+# Last Change:	2025-07-26 21:37:49
 
 if exists("g:loaded_bmk") || &cp || v:version < 901
     finish
@@ -31,7 +31,8 @@ for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 endfor
 
 # commands	{{{2
-command ListBookmarks	ListBmk()
+command ListBookmarks	ListBmk(true)
+command WhichBookmarks	ListBmk(false)
 command -nargs=? -complete=custom,BmkOpenComplete
 	    \ RemoveBookmark	RemoveBmk(<f-args>)
 
@@ -103,6 +104,12 @@ class BmkDict	# {{{2
 	SaveDict()
 	return bmk
     enddef
+
+    static def SearchFile(fname: string): list<list<any>>
+	LoadDict()
+	return copy(_dict)->filter((_, v) => stridx(v.file, fname) > 0)
+	    ->items()->sort((a, b) => a[0] < b[0] ? -1 : 1)
+    enddef
 endclass
 
 # functions	{{{2
@@ -154,11 +161,17 @@ def AddBmkHere(name: string)	# {{{3
     BmkDict.AddBmk(bname, expand("%:p"), pos[1], pos[2])
 enddef
 
-def ListBmk()	# {{{3
-    var bmks = BmkDict.GetBmkList()
+def ListBmk(all: bool=true)	# {{{3
+    # list all bookmarks (default), or the bookmarks than links to current
+    # file (if `all' is false).
+    var bmks = all ? BmkDict.GetBmkList() : BmkDict.SearchFile(expand('%'))
 
     if empty(bmks)
-	echo "ListBookmarks: No bookmark is recorded yet."
+	if all
+	    echo "No bookmark is recorded yet."
+	else
+	    echo "No bookmark links to current file."
+	endif
 	return
     endif
 
